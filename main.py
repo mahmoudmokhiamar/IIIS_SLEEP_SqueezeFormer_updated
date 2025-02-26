@@ -38,6 +38,25 @@ def run_experiment(generative_model, classifier_model):
             'discriminator_layer_size': [512, 256, 128],
             'learning_rate': lr
         }
+    elif generative_model == 'wgan':
+        generative_model_args = {
+            "device": device,
+            "num_classes": 4,
+            "channels": 1,
+            "generator_iters": 100,
+            "critic_iter": 5,
+            "batch_size": batch_size,
+            "latent_dim": 100,
+            "learning_rate": 0.00005,
+            "weight_cliping_limit": 0.01,
+            "num_epoch": 1,
+            "generator_conv": [256, 128, 64],
+            "discriminator_conv": [64, 128, 256],
+            "latent_feature_dim": 256,
+            "scheduler_step": 10,
+            "scheduler_gamma": 0.95,
+            "early_stop_patience": 10,
+        }
 
     if classifier_model == 'simpleClassifier':
         classifier_args = {
