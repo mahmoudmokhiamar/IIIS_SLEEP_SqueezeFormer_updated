@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import QuantileTransformer
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 
-from models.generativeModels import CGAN, DeltaEncoder
+from models.generativeModels import CGAN, DeltaEncoder, WGAN_CP
 from models.classifiers import SimpleClassifier, TransformerClassifier, EEGNetSingleChannel, SqueezeFormerClassifier
 
 warnings.filterwarnings("ignore")
@@ -69,6 +69,9 @@ class IIIS_DATA(object):
                 self.X_test, to_categorical(self.y_test)
             )
             self.logger.info('Generator set to DeltaEncoder')
+        elif generative_model == 'wgan':
+            self.generator = WGAN_CP(generative_model_args, self.X, self.y)
+            self.logger.info('Generator set to WGAN')
 
         classifier_model = self.config.get('classifier_model', 'SimpleClassifier').lower()
         with open(os.path.join(self.experiment_name, f"{generative_model}_{classifier_model}_params.json"), "w") as file:

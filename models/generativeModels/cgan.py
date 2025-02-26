@@ -4,90 +4,118 @@ import torch
 import numpy as np
 import torch.nn as nn
 from tqdm.auto import tqdm
+from .baseModel import BaseModel
 from torch.autograd import Variable
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader, TensorDataset
 
-
-### WGAN's implementation.
-
 class Generator(nn.Module):
-    def __init__(self, generator_layer_size, z_size, input_size, class_num):
+    def __init__(self, generator_layer_size, z_size, output_length, class_num):
         super().__init__()
         
         self.z_size = z_size
-        self.input_size = input_size
-        self.label_emb = nn.Embedding(class_num, class_num)
-        #change the approach of the generator from FCN to CNN.
-        layers = []
-        input_dim = z_size + class_num
-        for hidden_size in generator_layer_size:
-            layers.append(nn.Linear(input_dim, hidden_size))
-            layers.append(nn.LeakyReLU(0.2, inplace=True))
-            input_dim = hidden_size
+        self.class_num = class_num
+        self.output_length = output_length
+        self.generator_layer_size = generator_layer_size
 
-        layers.append(nn.Linear(input_dim, input_size))
+        self.label_emb = nn.Embedding(class_num, class_num)
+
+        n_layers = len(generator_layer_size)
+
+        self.L0 = output_length // (2 ** n_layers)
         
-        self.model = nn.Sequential(*layers)
+        if self.L0 < 1:
+            raise ValueError("Output length is too short for the given number of layers.")
+
+        init_channels = generator_layer_size[0]
+        self.fc = nn.Linear(z_size + class_num, init_channels * self.L0)
+
+        layers = []
+        in_channels = init_channels
+
+        for out_channels in generator_layer_size[1:]:
+            layers.append(nn.ConvTranspose1d(in_channels, out_channels, kernel_size=4, stride=2, padding=1))
+            layers.append(nn.BatchNorm1d(out_channels))
+            layers.append(nn.ReLU(True))
+            in_channels = out_channels
+
+        layers.append(nn.ConvTranspose1d(in_channels, 1, kernel_size=4, stride=2, padding=1))
+        layers.append(nn.Tanh())
+        self.deconv = nn.Sequential(*layers)
 
     def forward(self, z, labels):
         z = z.view(-1, self.z_size)
         c = self.label_emb(labels)
-        x = torch.cat([z, c], 1)
-        out = self.model(x)
-        return out.view(-1, self.input_size)
+        x = torch.cat([z, c], dim=1)
+        x = self.fc(x)
+        x = x.view(-1, self.generator_layer_size[0], self.L0)
+        out = self.deconv(x)
+        return out
 
 class Discriminator(nn.Module):
-    def __init__(self, discriminator_layer_size, input_size, class_num):
+    def __init__(self, discriminator_layer_size, input_length, class_num):
         super().__init__()
-        
-        self.label_emb = nn.Embedding(class_num, class_num)
-        self.input_size = input_size
+
+        self.input_length = input_length
+        self.class_num = class_num
+        self.discriminator_layer_size = discriminator_layer_size
+
+        self.label_emb = nn.Embedding(class_num, input_length)
 
         layers = []
-        input_dim = input_size + class_num
-        for hidden_size in discriminator_layer_size:
-            layers.append(nn.Linear(input_dim, hidden_size))
+        in_channels = 2
+        current_length = input_length
+        for out_channels in discriminator_layer_size:
+            layers.append(nn.Conv1d(in_channels, out_channels, kernel_size=4, stride=2, padding=1))
+            layers.append(nn.BatchNorm1d(out_channels))
             layers.append(nn.LeakyReLU(0.2, inplace=True))
-            layers.append(nn.Dropout(0.3))
-            input_dim = hidden_size
+            in_channels = out_channels
+            current_length = current_length // 2
 
-        layers.append(nn.Linear(input_dim, 1))
-        layers.append(nn.Sigmoid())
-        
-        self.model = nn.Sequential(*layers)
+        self.conv = nn.Sequential(*layers)
+        self.fc = nn.Linear(in_channels * current_length, 1)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x, labels):
-        x = x.view(-1, self.input_size)
-        c = self.label_emb(labels)
-        x = torch.cat([x, c], 1)
-        out = self.model(x)
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
+        
+        batch_size = x.size(0)
+        label_embedding = self.label_emb(labels).unsqueeze(1)
+        
+        x = torch.cat([x, label_embedding], dim=1)
+        
+        out = self.conv(x)
+        out = out.view(batch_size, -1)
+        out = self.fc(out)
+        out = self.sigmoid(out)
         return out.squeeze()
 
-class CGAN(object):
+
+class CGAN(BaseModel):
     def __init__(self, args, features, labels):
-        self.device = torch.device(args.get('device', 'cpu'))
-        print(f"Using device: {self.device}")
-        self.z_size = args['z_size']
-        self.num_epoch = args['num_epoch']
-        self.class_num = args['class_num']
-        self.batch_size = args['batch_size']
-        self.input_size = args['input_size']
-        self.learning_rate = args['learning_rate']
-        self.lr_decay_step = args.get('lr_decay_step', 4)
-        self.lr_decay_gamma = args.get('lr_decay_gamma', 0.1)
+        super(CGAN, self).__init__(args)
+        
+        self.z_size = self.args['z_size']
+        self.num_epoch = self.args['num_epoch']
+        self.class_num = self.args['class_num']
+        self.batch_size = self.args['batch_size']
+        self.input_size = self.args['input_size']
+        self.learning_rate = self.args['learning_rate']
+        self.lr_decay_step = self.args.get('lr_decay_step', 4)
+        self.lr_decay_gamma = self.args.get('lr_decay_gamma', 0.1)
 
         self.dataloader = DataLoader(
             TensorDataset(
-                torch.tensor(features, dtype=torch.float32),
+                torch.tensor(features, dtype=torch.float32).unsqueeze(1),
                 torch.tensor(labels, dtype=torch.long)
             ),
             batch_size=self.batch_size,
             shuffle=True
         )
 
-        self.generator = Generator(args['generator_layer_size'], self.z_size, self.input_size, self.class_num).to(self.device)
-        self.discriminator = Discriminator(args['discriminator_layer_size'], self.input_size, self.class_num).to(self.device)
+        self.generator = Generator(self.args['generator_layer_size'], self.z_size, self.input_size, self.class_num).to(self.device)
+        self.discriminator = Discriminator(self.args['discriminator_layer_size'], self.input_size, self.class_num).to(self.device)
         
         self.criterion = nn.BCELoss() #wasserstein gan loss. 
         self.g_optimizer = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate)
@@ -171,12 +199,12 @@ class CGAN(object):
         self.generator.train()
         return samples.cpu().detach().numpy()
 
-    def save_model(self, dir):
-        if not os.path.exists(dir):
-            os.makedirs(dir)
+    def save_model(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
         
         file_name = f"model_torch_final_{time.strftime('%Y%m%d')}.pt"
-        path = os.path.join(dir, file_name)
+        path = os.path.join(path, file_name)
         
         torch.save({
             'generator': self.generator.state_dict(),

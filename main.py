@@ -108,7 +108,7 @@ def run_experiment(generative_model, classifier_model):
     print(f"  Metrics after balancing:  {metrics_after}\n")
 
 if __name__ == "__main__":
-    generative_models = ['deltaEncoder', 'cGan']
+    generative_models = ['deltaEncoder', 'cGan', 'wgan']
     classifier_models = ['squeezeformer']
 
 

@@ -4,6 +4,7 @@ import random
 import numpy as np
 import torch.nn as nn
 from tqdm.auto import tqdm
+from .baseModel import BaseModel
 
 class Encoder(nn.Module):
     def __init__(self, feature_dim=256, encoder_size=[8192], z_dim=16, dropout=0.5, dropout_input=0.0, leak=0.2):
@@ -62,19 +63,21 @@ class Decoder(nn.Module):
         # return self.tanh(x)
         return x
 
-class DeltaEncoder(object):
+class DeltaEncoder(BaseModel):
     def __init__(self, args, features, labels, features_test, labels_test, resume = ''):
+        super(DeltaEncoder, self).__init__(args)
+
         self.count_data = 0
-        self.num_epoch = args['num_epoch']
-        self.noise_size = args['noise_size']
-        self.encoder_size = args['encoder_size']
-        self.decoder_size = args['decoder_size']
-        self.batch_size = args['batch_size']
-        self.drop_out_rate = args['drop_out_rate']
-        self.drop_out_rate_input = args['drop_out_rate_input']
-        self.learning_rate = args['learning_rate']
+        self.num_epoch = self.args['num_epoch']
+        self.noise_size = self.args['noise_size']
+        self.encoder_size = self.args['encoder_size']
+        self.decoder_size = self.args['decoder_size']
+        self.batch_size = self.args['batch_size']
+        self.drop_out_rate = self.args['drop_out_rate']
+        self.drop_out_rate_input = self.args['drop_out_rate_input']
+        self.learning_rate = self.args['learning_rate']
         self.decay_factor = 0.8
-        # self.num_shots = args['num_shots']
+        # self.num_shots = self.args['num_shots']
         self.resume = resume
 
         self.features, self.labels = features, labels
@@ -145,7 +148,7 @@ class DeltaEncoder(object):
                torch.from_numpy(self.reference_features[start:end]).float(), \
                torch.from_numpy(self.labels[start:end]).float()
 
-    def train(self, save=False):
+    def train(self):
         last_loss_epoch = None
         train_history, test_history = [], []
 
@@ -191,9 +194,6 @@ class DeltaEncoder(object):
             
             postfix = {'Epoch': f"{epoch + 1}/{self.num_epoch}", 'Train_loss': mean_loss_e.item(), 'Test_loss': test_loss.item(), 'lr': self.learning_rate}
             progress_bar.set_postfix(postfix)
-        
-        if save:
-            self.save_model(self.encoder, self.decoder, "./model_torch_final.pt")
 
         return train_history, test_history
 
@@ -234,3 +234,8 @@ class DeltaEncoder(object):
             'encoder_state_dict': self.encoder.state_dict(),
             'decoder_state_dict': self.decoder.state_dict(),
             }, save_dir)
+    
+    def load_model(self, load_dir):
+        checkpoint = torch.load(load_dir)
+        self.encoder.load_state_dict(checkpoint['encoder_state_dict'])
+        self.decoder.load_state_dict(checkpoint['decoder_state_dict'])
