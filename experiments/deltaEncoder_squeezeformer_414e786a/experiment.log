@@ -1,0 +1,82 @@
+2025-02-12 03:39:34,591 - Generator set to DeltaEncoder
+2025-02-12 03:39:34,592 - Training Generative Model...
+2025-02-12 03:44:45,442 - Train Loss: 0.31924837827682495
+2025-02-12 03:44:45,443 - Test Loss: 0.32297879457473755
+2025-02-12 03:44:45,575 - Saved train/test loss plot to ./experiments/deltaEncoder_squeezeformer_414e786a/generative_model_loss_curve.png
+2025-02-12 03:44:50,828 - Saved Delta Encoder visualization plot to ./experiments/deltaEncoder_squeezeformer_414e786a
+2025-02-12 03:44:50,902 - Starting Fold 0/2
+2025-02-12 03:44:51,687 - Training Classifier Before Balancing for Fold 0
+2025-02-12 04:00:57,589 - Fold 0 Accuracy Before Balancing: 0.7441848644920038
+2025-02-12 04:00:57,964 - Fold 0 Report Before Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.49      0.24      0.32     22060
+         1.0       0.85      0.88      0.86    158264
+         2.0       0.61      0.71      0.65     86445
+         3.0       0.29      0.01      0.02      8676
+
+    accuracy                           0.74    275445
+   macro avg       0.56      0.46      0.46    275445
+weighted avg       0.72      0.74      0.73    275445
+
+2025-02-12 04:00:58,078 - Saved loss curves plot to ./experiments/deltaEncoder_squeezeformer_414e786a/loss_curves_fold_0_before_balance.png
+2025-02-12 04:00:58,366 - Saved confusion matrix plot to ./experiments/deltaEncoder_squeezeformer_414e786a/confusion_matrix_fold_0_before_balance.png
+2025-02-12 04:00:58,366 - Balanced data generated.
+2025-02-12 04:01:00,371 - Standardizing balanced data...
+2025-02-12 04:02:36,367 - Saved class distribution (before) plot to ./experiments/deltaEncoder_squeezeformer_414e786a/fold_0_class_distribution_before.png
+2025-02-12 04:02:37,362 - Saved class distribution (after) plot to ./experiments/deltaEncoder_squeezeformer_414e786a/fold_0_class_distribution_after.png
+2025-02-12 04:02:37,362 - Training Classifier After Balancing for Fold 0
+2025-02-12 04:31:45,695 - Fold 0 Accuracy After Balancing: 0.6224073771533337
+2025-02-12 04:31:46,075 - Fold 0 Report After Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.55      0.38      0.45     22060
+         1.0       0.86      0.58      0.69    158264
+         2.0       0.47      0.80      0.59     86445
+         3.0       0.30      0.23      0.26      8676
+
+    accuracy                           0.62    275445
+   macro avg       0.55      0.50      0.50    275445
+weighted avg       0.70      0.62      0.63    275445
+
+2025-02-12 04:31:46,176 - Saved loss curves plot to ./experiments/deltaEncoder_squeezeformer_414e786a/loss_curves_fold_0_after_balance.png
+2025-02-12 04:31:46,460 - Saved confusion matrix plot to ./experiments/deltaEncoder_squeezeformer_414e786a/confusion_matrix_fold_0_after_balance.png
+2025-02-12 04:31:46,470 - Starting Fold 1/2
+2025-02-12 04:31:47,230 - Training Classifier Before Balancing for Fold 1
+2025-02-12 04:46:54,651 - Fold 1 Accuracy Before Balancing: 0.7504138772309435
+2025-02-12 04:46:55,026 - Fold 1 Report Before Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.52      0.34      0.41     22060
+         1.0       0.85      0.87      0.86    158263
+         2.0       0.62      0.71      0.66     86444
+         3.0       0.29      0.01      0.02      8677
+
+    accuracy                           0.75    275444
+   macro avg       0.57      0.48      0.49    275444
+weighted avg       0.73      0.75      0.74    275444
+
+2025-02-12 04:46:55,144 - Saved loss curves plot to ./experiments/deltaEncoder_squeezeformer_414e786a/loss_curves_fold_1_before_balance.png
+2025-02-12 04:46:55,436 - Saved confusion matrix plot to ./experiments/deltaEncoder_squeezeformer_414e786a/confusion_matrix_fold_1_before_balance.png
+2025-02-12 04:46:55,436 - Balanced data generated.
+2025-02-12 04:46:58,746 - Standardizing balanced data...
+2025-02-12 04:48:37,446 - Saved class distribution (before) plot to ./experiments/deltaEncoder_squeezeformer_414e786a/fold_1_class_distribution_before.png
+2025-02-12 04:48:38,425 - Saved class distribution (after) plot to ./experiments/deltaEncoder_squeezeformer_414e786a/fold_1_class_distribution_after.png
+2025-02-12 04:48:38,425 - Training Classifier After Balancing for Fold 1
+2025-02-12 05:25:11,512 - Fold 1 Accuracy After Balancing: 0.5978892261221882
+2025-02-12 05:25:11,894 - Fold 1 Report After Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.27      0.45      0.34     22060
+         1.0       0.87      0.58      0.69    158263
+         2.0       0.49      0.71      0.58     86444
+         3.0       0.29      0.24      0.26      8677
+
+    accuracy                           0.60    275444
+   macro avg       0.48      0.49      0.47    275444
+weighted avg       0.68      0.60      0.61    275444
+
+2025-02-12 05:25:12,004 - Saved loss curves plot to ./experiments/deltaEncoder_squeezeformer_414e786a/loss_curves_fold_1_after_balance.png
+2025-02-12 05:25:12,288 - Saved confusion matrix plot to ./experiments/deltaEncoder_squeezeformer_414e786a/confusion_matrix_fold_1_after_balance.png
+2025-02-12 05:25:12,289 - Average Metrics Before Balancing across 2 folds: {'accuracy': 0.7472993708614737, 'f1': 0.730772089054393, 'precision': 0.7296449045758335, 'recall': 0.7472993708614737}
+2025-02-12 05:25:12,289 - Average Metrics After Balancing across 2 folds: {'accuracy': 0.6101483016377609, 'f1': 0.6213289637219082, 'precision': 0.6883523071812506, 'recall': 0.6101483016377609}

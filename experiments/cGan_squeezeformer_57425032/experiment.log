@@ -1,0 +1,82 @@
+2025-02-12 05:26:56,418 - Generator set to CGAN
+2025-02-12 05:26:56,418 - Training Generative Model...
+2025-02-12 06:50:38,854 - Generator Loss: 0.0
+2025-02-12 06:50:38,854 - Discriminator Loss: 100.0
+2025-02-12 06:50:38,999 - Saved generator/discriminator loss plot to ./experiments/cGan_squeezeformer_57425032/generative_model_loss_curve.png
+2025-02-12 06:50:42,222 - Saved Delta Encoder visualization plot to ./experiments/cGan_squeezeformer_57425032
+2025-02-12 06:50:42,293 - Starting Fold 0/2
+2025-02-12 06:50:43,054 - Training Classifier Before Balancing for Fold 0
+2025-02-12 07:05:36,897 - Fold 0 Accuracy Before Balancing: 0.7452122928352303
+2025-02-12 07:05:37,265 - Fold 0 Report Before Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.50      0.26      0.34     22060
+         1.0       0.85      0.88      0.86    158264
+         2.0       0.61      0.71      0.65     86445
+         3.0       0.32      0.02      0.03      8676
+
+    accuracy                           0.75    275445
+   macro avg       0.57      0.46      0.47    275445
+weighted avg       0.73      0.75      0.73    275445
+
+2025-02-12 07:05:37,382 - Saved loss curves plot to ./experiments/cGan_squeezeformer_57425032/loss_curves_fold_0_before_balance.png
+2025-02-12 07:05:37,669 - Saved confusion matrix plot to ./experiments/cGan_squeezeformer_57425032/confusion_matrix_fold_0_before_balance.png
+2025-02-12 07:05:37,669 - Balanced data generated.
+2025-02-12 07:05:39,472 - Standardizing balanced data...
+2025-02-12 07:07:04,225 - Saved class distribution (before) plot to ./experiments/cGan_squeezeformer_57425032/fold_0_class_distribution_before.png
+2025-02-12 07:07:05,212 - Saved class distribution (after) plot to ./experiments/cGan_squeezeformer_57425032/fold_0_class_distribution_after.png
+2025-02-12 07:07:05,212 - Training Classifier After Balancing for Fold 0
+2025-02-12 07:33:40,069 - Fold 0 Accuracy After Balancing: 0.5309444716731108
+2025-02-12 07:33:40,447 - Fold 0 Report After Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.13      0.36      0.19     22060
+         1.0       0.87      0.50      0.64    158264
+         2.0       0.47      0.68      0.56     86445
+         3.0       0.06      0.00      0.00      8676
+
+    accuracy                           0.53    275445
+   macro avg       0.38      0.39      0.35    275445
+weighted avg       0.66      0.53      0.56    275445
+
+2025-02-12 07:33:40,565 - Saved loss curves plot to ./experiments/cGan_squeezeformer_57425032/loss_curves_fold_0_after_balance.png
+2025-02-12 07:33:40,859 - Saved confusion matrix plot to ./experiments/cGan_squeezeformer_57425032/confusion_matrix_fold_0_after_balance.png
+2025-02-12 07:33:40,867 - Starting Fold 1/2
+2025-02-12 07:33:41,623 - Training Classifier Before Balancing for Fold 1
+2025-02-12 07:50:58,814 - Fold 1 Accuracy Before Balancing: 0.7483880571005359
+2025-02-12 07:50:59,196 - Fold 1 Report Before Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.50      0.31      0.38     22060
+         1.0       0.85      0.87      0.86    158263
+         2.0       0.62      0.72      0.66     86444
+         3.0       0.36      0.02      0.04      8677
+
+    accuracy                           0.75    275444
+   macro avg       0.58      0.48      0.49    275444
+weighted avg       0.74      0.75      0.73    275444
+
+2025-02-12 07:50:59,317 - Saved loss curves plot to ./experiments/cGan_squeezeformer_57425032/loss_curves_fold_1_before_balance.png
+2025-02-12 07:50:59,614 - Saved confusion matrix plot to ./experiments/cGan_squeezeformer_57425032/confusion_matrix_fold_1_before_balance.png
+2025-02-12 07:50:59,614 - Balanced data generated.
+2025-02-12 07:51:01,517 - Standardizing balanced data...
+2025-02-12 07:52:27,407 - Saved class distribution (before) plot to ./experiments/cGan_squeezeformer_57425032/fold_1_class_distribution_before.png
+2025-02-12 07:52:28,404 - Saved class distribution (after) plot to ./experiments/cGan_squeezeformer_57425032/fold_1_class_distribution_after.png
+2025-02-12 07:52:28,404 - Training Classifier After Balancing for Fold 1
+2025-02-12 08:19:09,362 - Fold 1 Accuracy After Balancing: 0.5296357880367697
+2025-02-12 08:19:09,738 - Fold 1 Report After Balancing: 
+              precision    recall  f1-score   support
+
+         0.0       0.15      0.45      0.23     22060
+         1.0       0.86      0.50      0.63    158263
+         2.0       0.48      0.66      0.55     86444
+         3.0       0.04      0.00      0.00      8677
+
+    accuracy                           0.53    275444
+   macro avg       0.38      0.40      0.35    275444
+weighted avg       0.66      0.53      0.56    275444
+
+2025-02-12 08:19:09,850 - Saved loss curves plot to ./experiments/cGan_squeezeformer_57425032/loss_curves_fold_1_after_balance.png
+2025-02-12 08:19:10,140 - Saved confusion matrix plot to ./experiments/cGan_squeezeformer_57425032/confusion_matrix_fold_1_after_balance.png
+2025-02-12 08:19:10,141 - Average Metrics Before Balancing across 2 folds: {'accuracy': 0.7468001749678831, 'f1': 0.7309309206021939, 'precision': 0.7316491520767876, 'recall': 0.7468001749678831}
+2025-02-12 08:19:10,141 - Average Metrics After Balancing across 2 folds: {'accuracy': 0.5302901298549403, 'f1': 0.5558024563137427, 'precision': 0.6593742500424669, 'recall': 0.5302901298549403}
