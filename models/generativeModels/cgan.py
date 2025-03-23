@@ -117,7 +117,7 @@ class CGAN(BaseModel):
         self.generator = Generator(self.args['generator_layer_size'], self.z_size, self.input_size, self.class_num).to(self.device)
         self.discriminator = Discriminator(self.args['discriminator_layer_size'], self.input_size, self.class_num).to(self.device)
         
-        self.criterion = nn.BCELoss() #wasserstein gan loss. 
+        self.criterion = nn.BCELoss() 
         self.g_optimizer = torch.optim.Adam(self.generator.parameters(), lr=self.learning_rate)
         self.d_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=self.learning_rate)
 
@@ -197,7 +197,7 @@ class CGAN(BaseModel):
             labels = torch.full((n_ex,), label, dtype=torch.long).to(self.device)
             samples = self.generator(z, labels)
         self.generator.train()
-        return samples.cpu().detach().numpy()
+        return samples.squeeze().cpu().detach().numpy()
 
     def save_model(self, path):
         if not os.path.exists(path):

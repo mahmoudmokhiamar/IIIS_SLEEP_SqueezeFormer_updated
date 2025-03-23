@@ -1,4 +1,5 @@
 import os
+import gc
 import json
 import time
 import torch
@@ -17,7 +18,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import QuantileTransformer
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 
-from models.generativeModels import CGAN, DeltaEncoder, WGAN_CP
+from models.generativeModels import CGAN, DeltaEncoder, WGANModel
 from models.classifiers import SimpleClassifier, TransformerClassifier, EEGNetSingleChannel, SqueezeFormerClassifier
 
 warnings.filterwarnings("ignore")
@@ -70,7 +71,7 @@ class IIIS_DATA(object):
             )
             self.logger.info('Generator set to DeltaEncoder')
         elif generative_model == 'wgan':
-            self.generator = WGAN_CP(generative_model_args, self.X, self.y)
+            self.generator = WGANModel(generative_model_args, self.X, self.y)
             self.logger.info('Generator set to WGAN')
 
         classifier_model = self.config.get('classifier_model', 'SimpleClassifier').lower()
@@ -139,7 +140,6 @@ class IIIS_DATA(object):
 
             if self.generator:
                 self.logger.info('Balanced data generated.')
-                
                 X_train_balanced, y_train_balanced = self._balance_data(X_train, y_train)
                 self._plot_class_distribution(y_train, y_train_balanced, prefix=f"fold_{fold}")
             else:
@@ -175,6 +175,14 @@ class IIIS_DATA(object):
             self._plot_loss_curves(train_history_after, test_history_after, f"fold_{fold}_after_balance")
             self._plot_confusion_matrix(y_val, preds_after, f"fold_{fold}_after_balance")
 
+            self._cleanup_fold(
+                classifier_objs=[
+                    classifier_before, classifier_after,
+                    X_train, y_train, X_val, y_val,
+                    X_train_balanced, y_train_balanced
+                ]
+            )
+
         metrics_before = {
             "accuracy": np.mean([result["accuracy"] for result in results_before_balance]),
             "f1": np.mean([result["f1"] for result in results_before_balance]),
@@ -191,6 +199,9 @@ class IIIS_DATA(object):
 
         self.logger.info(f"Average Metrics Before Balancing across {k_folds} folds: {metrics_before}")
         self.logger.info(f"Average Metrics After Balancing across {k_folds} folds: {metrics_after}")
+
+        self._cleanup_experiment()
+
         torch.cuda.empty_cache()
         return metrics_before, metrics_after
     
@@ -304,7 +315,7 @@ class IIIS_DATA(object):
 
             random_index = np.random.randint(0, self.X_test[mask].shape[0])
             original_sample = self.X_test[random_index]
-            generated_sample = self.generator.generate_samples(1, c)[0]
+            generated_sample = self.generator.generate_samples(1, c)
             generated_sample = self.scaler.transform(generated_sample.reshape(1, -1))[0]
 
             plt.subplot(len(classes), 4, i * 4 + 1)
@@ -394,7 +405,7 @@ class IIIS_DATA(object):
         if standardize:
             print('Standardizing data...')
             self.X = self._standardize_data()
-
+            
         print('Splitting data...')
         if stratify:
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
@@ -429,3 +440,28 @@ class IIIS_DATA(object):
         balanced_y = np.concatenate(balanced_y)
         
         return balanced_X, balanced_y
+    
+    def _cleanup_fold(self, classifier_objs=None):
+        if classifier_objs is not None:
+            for obj in classifier_objs:
+                del obj
+
+        gc.collect()
+        torch.cuda.empty_cache()
+        self.logger.info("Cleaned up fold-specific variables and GPU cache.")
+
+    def _cleanup_experiment(self):
+        heavy_vars = ['X', 'y', 'X_train', 'X_test', 'y_train', 'y_test', 'scaler']
+        for var in heavy_vars:
+            if hasattr(self, var):
+                delattr(self, var)
+        
+        if hasattr(self, 'generator'):
+            del self.generator
+        
+        if hasattr(self, 'classifier'):
+            del self.classifier
+
+        gc.collect()
+        torch.cuda.empty_cache()
+        self.logger.info("Cleaned up experiment variables and GPU cache.")
