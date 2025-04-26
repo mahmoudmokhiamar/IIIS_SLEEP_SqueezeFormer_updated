@@ -54,24 +54,25 @@ class EEGNetSingleChannel(BaseModel):
         self.to(self.device)
 
     def forward(self, x):
+        if x.dim() == 3:
+            x = x.unsqueeze(1)
+        elif x.dim() == 2:
+            x = x.unsqueeze(1).unsqueeze(1)
+
         x = self.conv_temporal(x)
         x = self.batchnorm_temporal(x)
-
         x = self.conv_depthwise(x)
         x = self.batchnorm_depthwise(x)
         x = self.activation1(x)
         x = self.avgpool1(x)
         x = self.dropout1(x)
-
         x = self.conv_separable(x)
         x = self.batchnorm_separable(x)
         x = self.activation2(x)
         x = self.avgpool2(x)
         x = self.dropout2(x)
-
         x = self.flatten(x)
         x = self.fc(x)
-        
         return x
 
     def train_model(self):
@@ -134,13 +135,21 @@ class EEGNetSingleChannel(BaseModel):
     def predict(self, x):
         if not isinstance(x, torch.Tensor):
             x = torch.tensor(x, dtype=torch.float32)
+
+        if x.dim() == 2:
+            x = x.unsqueeze(1)
+        elif x.dim() == 3 and x.shape[1] != 1:
+            x = x.unsqueeze(1)
+        
         x = x.to(self.device)
 
         self.eval()
         with torch.no_grad():
             output = self(x)
             _, predicted = torch.max(output.data, 1)
+
         return predicted.cpu().detach().numpy()
+
 
     def save_model(self, path):
         torch.save(self.state_dict(), path)
