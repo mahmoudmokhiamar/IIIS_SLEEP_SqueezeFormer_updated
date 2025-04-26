@@ -113,7 +113,8 @@ class IIIS_DATA(object):
             train_history_before, test_history_before = classifier_before.train_model()
 
             if type(classifier_before).__name__ == 'EEGNetSingleChannel':
-                preds_before = classifier_before.predict(X_val.reshape(X_val.shape[0], 1, 1, X_val.shape[1]))
+                X_val = torch.tensor(X_val, dtype=torch.float32).to(classifier_before.device).unsqueeze(1)
+                preds_before = classifier_before.predict(X_val)
             elif type(classifier_before).__name__ == 'SqueezeFormerClassifier':
                 preds_before = classifier_before.predict(X_val.reshape(X_val.shape[0], 1, X_val.shape[1]))
             else:
