@@ -398,8 +398,6 @@ class IIIS_DATA(object):
         print('Loading data...')
         data = np.load(path)
         self.X, self.y = data['windows'], data['labels']
-        self.X = self.X[:1000]
-        self.y = self.y[:1000]
 
         mask = ~np.isnan(self.X).any(axis=1) & ~np.isnan(self.y)
         self.X, self.y = self.X[mask], self.y[mask]
