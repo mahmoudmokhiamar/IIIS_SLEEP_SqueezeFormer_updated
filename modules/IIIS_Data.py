@@ -150,7 +150,7 @@ class IIIS_DATA(object):
             train_history_after, test_history_after = classifier_after.train_model()
 
             if type(classifier_before).__name__ == 'EEGNetSingleChannel':
-                preds_after = classifier_after.predict(X_val.reshape(X_val.shape[0], 1, 1, X_val.shape[1]))
+                preds_after = classifier_after.predict(X_val)
             elif type(classifier_before).__name__ == 'SqueezeFormerClassifier':
                 preds_after = classifier_after.predict(X_val.reshape(X_val.shape[0], 1, X_val.shape[1]))
             else:
@@ -219,9 +219,9 @@ class IIIS_DATA(object):
         elif classifier_model == 'eegnet':            
             return EEGNetSingleChannel(
                 classifier_args, 
-                X_train.reshape(X_train.shape[0], 1, 1, X_train.shape[1]),
+                X_train,
                 y_train,
-                X_val.reshape(X_val.shape[0], 1, 1, X_val.shape[1]),
+                X_val,
                 y_val
             )
         elif classifier_model == 'squeezeformer':
@@ -398,7 +398,9 @@ class IIIS_DATA(object):
         print('Loading data...')
         data = np.load(path)
         self.X, self.y = data['windows'], data['labels']
-        
+        self.X = self.X[:1000]
+        self.y = self.y[:1000]
+
         mask = ~np.isnan(self.X).any(axis=1) & ~np.isnan(self.y)
         self.X, self.y = self.X[mask], self.y[mask]
 

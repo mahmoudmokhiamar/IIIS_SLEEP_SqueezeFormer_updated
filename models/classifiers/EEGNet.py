@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
 from tqdm.auto import tqdm
 from .baseModel import BaseModel
-from torch.utils.data import DataLoader, TensorDataset
 
 class EEGNetSingleChannel(BaseModel):
     def __init__(self, args, X_train, y_train, X_test, y_test):
@@ -17,20 +17,20 @@ class EEGNetSingleChannel(BaseModel):
 
         F2 = F1 * D
 
-        self.conv_temporal = nn.Conv2d(1, F1, (1, kernLength), padding='same', bias=False)
-        self.batchnorm_temporal = nn.BatchNorm2d(F1)
+        self.conv_temporal = nn.Conv1d(1, F1, kernel_size=kernLength, padding='same', bias=False)
+        self.batchnorm_temporal = nn.BatchNorm1d(F1)
 
-        self.conv_depthwise = nn.Conv2d(F1, F1 * D, (1, 1), groups=F1, bias=False)
-        self.batchnorm_depthwise = nn.BatchNorm2d(F1 * D)
+        self.conv_depthwise = nn.Conv1d(F1, F1 * D, kernel_size=1, groups=F1, bias=False)
+        self.batchnorm_depthwise = nn.BatchNorm1d(F1 * D)
         self.activation1 = nn.ELU()
-        self.avgpool1 = nn.AvgPool2d((1, 4))
-        self.dropout1 = nn.Dropout2d(dropoutRate)
+        self.avgpool1 = nn.AvgPool1d(kernel_size=4)
+        self.dropout1 = nn.Dropout(dropoutRate)
 
-        self.conv_separable = nn.Conv2d(F1 * D, F2, (1, 16), padding='same', bias=False)
-        self.batchnorm_separable = nn.BatchNorm2d(F2)
+        self.conv_separable = nn.Conv1d(F1 * D, F2, kernel_size=16, padding='same', bias=False)
+        self.batchnorm_separable = nn.BatchNorm1d(F2)
         self.activation2 = nn.ELU()
-        self.avgpool2 = nn.AvgPool2d((1, 8))
-        self.dropout2 = nn.Dropout2d(dropoutRate)
+        self.avgpool2 = nn.AvgPool1d(kernel_size=8)
+        self.dropout2 = nn.Dropout(dropoutRate)
 
         reduced_time = Samples // (4 * 8)
         self.flatten = nn.Flatten()
@@ -38,7 +38,6 @@ class EEGNetSingleChannel(BaseModel):
 
         self.X_train = torch.tensor(X_train, dtype=torch.float32)
         self.y_train = torch.tensor(y_train, dtype=torch.long)
-
         self.X_test = torch.tensor(X_test, dtype=torch.float32)
         self.y_test = torch.tensor(y_test, dtype=torch.long)
 
@@ -54,10 +53,8 @@ class EEGNetSingleChannel(BaseModel):
         self.to(self.device)
 
     def forward(self, x):
-        if x.dim() == 3:
+        if x.dim() == 2:
             x = x.unsqueeze(1)
-        elif x.dim() == 2:
-            x = x.unsqueeze(1).unsqueeze(1)
 
         x = self.conv_temporal(x)
         x = self.batchnorm_temporal(x)
