@@ -129,24 +129,29 @@ class EEGNetSingleChannel(BaseModel):
 
         return train_history, test_history
 
-    def predict(self, x):
+    def predict(self, x, batch_size=64):
         if not isinstance(x, torch.Tensor):
             x = torch.tensor(x, dtype=torch.float32)
 
+        if x.dim() == 1:
+            x = x.unsqueeze(0)
         if x.dim() == 2:
             x = x.unsqueeze(1)
         elif x.dim() == 3 and x.shape[1] != 1:
             x = x.unsqueeze(1)
-        
+
         x = x.to(self.device)
 
         self.eval()
+        all_preds = []
         with torch.no_grad():
-            output = self(x)
-            _, predicted = torch.max(output.data, 1)
+            for start_idx in range(0, len(x), batch_size):
+                batch_x = x[start_idx:start_idx + batch_size]
+                output = self(batch_x)
+                _, predicted = torch.max(output.data, 1)
+                all_preds.append(predicted.cpu())
 
-        return predicted.cpu().detach().numpy()
-
+        return torch.cat(all_preds, dim=0).detach().numpy()
 
     def save_model(self, path):
         torch.save(self.state_dict(), path)
